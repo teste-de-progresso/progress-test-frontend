@@ -2,9 +2,9 @@ import React, {
   createContext, useContext, useState, FC
 } from "react";
 import { useQuery, gql } from "@apollo/client";
-import firebase from "firebase";
 
 import { Query, UserRoles } from "../__generated__/graphql-schema";
+import { UnauthorizedAccess } from "../pages/session";
 
 export type UserContext = {
   user?: Query['currentUser']
@@ -54,10 +54,6 @@ export const UserContext: FC<Props> = ({ children, authToken }) => {
   const { refetch: refetchUserQuery } = useQuery<Query>(CurrentUserQuery, {
     onCompleted: ({ currentUser }) => {
       setUser(currentUser)
-    },
-    onError: ({ message }) => {
-      console.error('token error:', message)
-      firebase.auth().signOut();
     }
   })
 
@@ -68,7 +64,7 @@ export const UserContext: FC<Props> = ({ children, authToken }) => {
 
   return (
     <Context.Provider value={{ user, refetch, isOnlyTeacher, authToken }}>
-      {user && children}
+      {user ? children : <UnauthorizedAccess />}
     </Context.Provider>
   );
 };
